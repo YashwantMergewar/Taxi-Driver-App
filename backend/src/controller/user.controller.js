@@ -29,6 +29,7 @@ const registerUser = asyncHandler(async (req, res) => {
   const validatedData = userRegistrationSchema.safeParse(req.body);
 
   if (!validatedData.success) {
+    // console.log(validatedData.error.errors);
     throw new ApiError(400, "Validation failed", validatedData.error.errors);
   }
 
@@ -100,9 +101,7 @@ const registerUser = asyncHandler(async (req, res) => {
       throw new ApiError(500, "Something went wrong while registering the user");
     }
 
-    return res.status(201).json(new ApiResponse(201, "User registered successfully", {
-        user: createdUser
-    }));
+    return res.status(201).json(new ApiResponse(201, createdUser, "User registered successfully"));
   } catch (error) {
     throw new ApiError(500, error.message || "Unable to register voter..!");
   }
@@ -165,7 +164,9 @@ const loginUser = asyncHandler(async (req, res) => {
     return res.status(200).json({
       success: true,
       message: `${populatedUser?.role} ${populatedUser.passengerRef?.fullname || populatedUser.driverRef?.fullname} logged in successfully`,
-      user: populatedUser
+      user: populatedUser,
+      accessToken,   // Added for Expo compatibility
+      refreshToken  // Added for Expo compatibility
     });
 
   } catch (error) {
@@ -203,4 +204,22 @@ const logoutUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "User logged out successfully"));
 });
 
-export { registerUser, loginUser, logoutUser };
+const getCurrentUser = asyncHandler(async (req, res) => {
+  let populatedUser;
+
+  if (req.user.role === "Driver") {
+    populatedUser = await User.findById(req.user._id)
+      .populate("driverRef")
+      .select("-password -refreshToken");
+  } else {
+    populatedUser = await User.findById(req.user._id)
+      .populate("passengerRef")
+      .select("-password -refreshToken");
+  }
+
+  return res.status(200).json(
+    new ApiResponse(200, populatedUser, "User profile retrieved successfully")
+  );
+});
+
+export { registerUser, loginUser, logoutUser, getCurrentUser };

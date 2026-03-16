@@ -19,7 +19,7 @@ export const getMyPassengerProfile = asyncHandler(async (req, res) => {
       throw new ApiError(404, "Passenger profile not found");
     }
   
-    return res.status(200).json(new ApiResponse(true, "Passenger profile retrieved successfully", passenger));
+    return res.status(200).json(new ApiResponse(200, passenger, "Passenger profile retrieved successfully"));
   } catch (error) {
     throw new ApiError(500, error.message || "Failed to retrieve passenger profile");
   }
@@ -40,7 +40,7 @@ export const updatePassengerProfile = asyncHandler(async (req, res) => {
       { new: true }
     );
   
-    return res.status(200).json(new ApiResponse(true, "Passenger profile updated successfully", passenger));
+    return res.status(200).json(new ApiResponse(200, passenger, "Passenger profile updated successfully"));
   } catch (error) {
     throw new ApiError(500, error.message || "Failed to update passenger profile");
   }
@@ -62,7 +62,7 @@ export const getMyBookings = asyncHandler(async (req, res) => {
       .populate("driverRef")
       .sort({ createdAt: -1 });
   
-    return res.status(200).json(new ApiResponse(true, "Bookings retrieved successfully", bookings));
+    return res.status(200).json(new ApiResponse(200, bookings, "Bookings retrieved successfully"));
   } catch (error) {
     throw new ApiError(500, error.message || "Failed to retrieve bookings");
   }
@@ -85,16 +85,16 @@ export const cancelBooking = asyncHandler(async (req, res) => {
     }
   
     if (
-      booking.status === "COMPLETED" ||
-      booking.status === "CANCELLED"
+      booking.status === "completed" ||
+      booking.status === "cancelled"
     ) {
       throw new ApiError(400, "Cannot cancel this booking");
     }
   
-    booking.status = "CANCELLED";
+    booking.status = "cancelled";
     await booking.save();
   
-    return res.status(200).json(new ApiResponse(true, "Booking cancelled successfully", booking));
+    return res.status(200).json(new ApiResponse(200, booking, "Booking cancelled successfully"));
   } catch (error) {
     throw new ApiError(500, error.message || "Failed to cancel booking");
   }

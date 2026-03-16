@@ -1,6 +1,11 @@
 import mongoose, { Schema } from "mongoose";
 
 const rideHistorySchema = new Schema({
+    bookingRef: {
+        type: Schema.Types.ObjectId,
+        ref: "Booking",
+        required: true
+    },
     passengerRef: {
         type: Schema.Types.ObjectId,
         ref: "Passenger",

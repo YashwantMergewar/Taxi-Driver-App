@@ -14,7 +14,7 @@ if(process.env.NODE_ENV === "production"){
 }
 
 app.use(cors({
-    origin: process.env.FRONTEND_URL,
+    origin: process.env.FRONTEND_URL || true,
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -29,6 +29,9 @@ app.use("/api/v1/bookings", bookingRoute)
 app.use("/api/v1/passenger", passengerRoute)
 app.use("/api/v1/driver", driverRoute)
 app.use("/api/v1/ride-history", rideHistoryRoute)
+
+// Simple healthcheck for device testing
+app.get('/ping', (req, res) => res.status(200).send('pong'));
 
 
 

@@ -26,11 +26,19 @@ export const createBooking = asyncHandler(async (req, res) => {
       finalFare: 3000
     });
 
+    // Debug log
+    // eslint-disable-next-line no-console
+    console.log(`createBooking: passenger=${passenger._id} booking=${booking._id} pickup=${JSON.stringify(pickupLocation)} dropoff=${JSON.stringify(dropoffLocation)}`);
+
     // Assign first driver
     const firstDriver = await Driver.findOne({
       status: "available",
       queuePosition: { $gt: 0 },
     }).sort({ queuePosition: 1 });
+
+    // Debug log
+    // eslint-disable-next-line no-console
+    console.log(`createBooking: firstDriver=${firstDriver ? firstDriver._id : 'none'}`);
 
     if (!firstDriver) {
       booking.status = "cancelled";
@@ -45,10 +53,17 @@ export const createBooking = asyncHandler(async (req, res) => {
     booking.status = "assigned";
     await booking.save();
 
+    // Populate references in response
+    await booking.populate("passengerRef driverRef");
+
+    // Debug log
+    // eslint-disable-next-line no-console
+    console.log(`createBooking: assigned driver=${firstDriver._id} to booking=${booking._id}`);
+
     return res
       .status(201)
       .json(
-        new ApiResponse(true, "Booking created and driver assigned", booking),
+        new ApiResponse(201, booking, "Booking created and driver assigned")
       );
   } catch (error) {
     throw new ApiError(500, error.message || "Unable to create booking");
@@ -57,6 +72,9 @@ export const createBooking = asyncHandler(async (req, res) => {
 
 export const acceptBooking = asyncHandler(async (req, res) => {
   try {
+    // Debug log
+    // eslint-disable-next-line no-console
+    console.log(`acceptBooking: request by user=${req.user._id} bookingId=${req.params.id}`);
     const driver = await Driver.findOne({
       userRef: req.user._id,
     });
@@ -65,7 +83,7 @@ export const acceptBooking = asyncHandler(async (req, res) => {
       _id: req.params.id,
       driverRef: driver._id,
       status: "assigned",
-    });
+    }).populate("passengerRef driverRef");
 
     if (!booking) {
       throw new ApiError(404, "Booking not found");
@@ -78,9 +96,13 @@ export const acceptBooking = asyncHandler(async (req, res) => {
     driver.queuePosition = 0; // remove from queue
     await driver.save();
 
+    // Debug log
+    // eslint-disable-next-line no-console
+    console.log(`acceptBooking: booking=${booking._id} confirmed driver=${driver._id}`);
+
     return res
       .status(200)
-      .json(new ApiResponse(true, "Booking accepted", booking));
+      .json(new ApiResponse(200, booking, "Booking accepted"));
   } catch (error) {
     throw new ApiError(500, error.message || "Unable to accept booking");
   }
@@ -88,6 +110,9 @@ export const acceptBooking = asyncHandler(async (req, res) => {
 
 export const rejectBooking = asyncHandler(async (req, res) => {
   try {
+    // Debug log
+    // eslint-disable-next-line no-console
+    console.log(`rejectBooking: request by user=${req.user._id} bookingId=${req.params.id}`);
     const driver = await Driver.findOne({
       userRef: req.user._id,
     });
@@ -96,7 +121,7 @@ export const rejectBooking = asyncHandler(async (req, res) => {
       _id: req.params.id,
       driverRef: driver._id,
       status: "assigned",
-    });
+    }).populate("passengerRef");
 
     if (!booking) {
       throw new ApiError(404, "Booking not found");
@@ -114,16 +139,22 @@ export const rejectBooking = asyncHandler(async (req, res) => {
 
     if (!nextDriver) {
       booking.status = "cancelled";
+      // Debug log
+      // eslint-disable-next-line no-console
+      console.log(`rejectBooking: no nextDriver -> booking=${booking._id} cancelled`);
     } else {
       booking.driverRef = nextDriver._id;
       booking.status = "assigned";
+      // Debug log
+      // eslint-disable-next-line no-console
+      console.log(`rejectBooking: reassigned booking=${booking._id} to driver=${nextDriver._id}`);
     }
 
     await booking.save();
 
     return res
       .status(200)
-      .json(new ApiResponse(true, "Booking rejected", booking));
+      .json(new ApiResponse(200, booking, "Booking rejected"));
   } catch (error) {
     throw new ApiError(500, error.message || "Unable to reject booking");
   }
@@ -131,6 +162,9 @@ export const rejectBooking = asyncHandler(async (req, res) => {
 
 export const completeTrip = asyncHandler(async (req, res) => {
   try {
+    // Debug log
+    // eslint-disable-next-line no-console
+    console.log(`completeTrip: request by user=${req.user._id} bookingId=${req.params.id}`);
     const driver = await Driver.findOne({
       userRef: req.user._id,
     });
@@ -139,7 +173,7 @@ export const completeTrip = asyncHandler(async (req, res) => {
       _id: req.params.id,
       driverRef: driver._id,
       status: "confirmed",
-    });
+    }).populate("passengerRef driverRef");
 
     if (!booking) {
       throw new ApiError(404, "Booking not found");
@@ -173,13 +207,17 @@ export const completeTrip = asyncHandler(async (req, res) => {
     driver.queuePosition = newPosition;
     await driver.save();
 
+    // Debug log
+    // eslint-disable-next-line no-console
+    console.log(`completeTrip: booking=${booking._id} completed; driver=${driver._id} re-added position=${newPosition}`);
+
     return res
       .status(200)
       .json(
         new ApiResponse(
-          true,
-          "Trip completed and driver re-added to queue",
+          200,
           null,
+          "Trip completed and driver re-added to queue"
         ),
       );
   } catch (error) {

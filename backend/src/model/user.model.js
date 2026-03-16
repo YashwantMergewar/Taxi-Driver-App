@@ -92,10 +92,10 @@ userSchema.pre("save", async function (next) {
     try {
         const salt = await bcrypt.genSalt(10);
         this.password = await bcrypt.hash(this.password, salt);
-        next; // Call next() to proceed to the next middleware or save operation
+        next;
     } catch (error) {
         console.error("Error hashing password:", error);
-        next(error); // Pass the error to the next middleware
+        next(error);
     }
 
 });
