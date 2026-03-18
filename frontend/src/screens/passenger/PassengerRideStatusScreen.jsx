@@ -126,7 +126,7 @@ const PassengerRideStatus = ({ route, navigation }) => {
         </View>
 
         {/* ── Fare + Distance Card ────────────────────────────────────────── */}
-        {(booking?.estimatedFare || booking?.fare || booking?.distanceKm) && (
+        {(booking?.fare || booking?.distanceKm) && (
           <View className="mb-4">
             <Card>
               <View className="flex-row justify-between items-center">
@@ -135,14 +135,14 @@ const PassengerRideStatus = ({ route, navigation }) => {
                     className="text-[11px] font-semibold text-gray-400 uppercase"
                     style={{ letterSpacing: 1 }}
                   >
-                    {booking?.fare ? 'Final Fare' : 'Estimated Fare'}
+                    Fare
                   </Text>
                   {booking?.distanceKm && (
                     <Text className="text-gray-400 text-xs mt-1">{booking.distanceKm} km</Text>
                   )}
                 </View>
                 <Text className="text-[28px] font-bold text-black">
-                  ₹{booking?.fare ?? booking?.estimatedFare}
+                  {booking?.fare ? `₹${booking.fare}` : 'As metered'}
                 </Text>
               </View>
             </Card>
@@ -227,7 +227,7 @@ const PassengerRideStatus = ({ route, navigation }) => {
             <View className="flex-row justify-between py-[6px]">
               <Text className="text-gray-400 text-[13px]">Booking ID</Text>
               <Text className="text-black font-semibold text-[13px]">
-                {booking?._id?.slice(-8).toUpperCase()}
+                {booking?._id?.slice(-8)?.toUpperCase()}
               </Text>
             </View>
             <View className="h-px bg-gray-100 my-1" />

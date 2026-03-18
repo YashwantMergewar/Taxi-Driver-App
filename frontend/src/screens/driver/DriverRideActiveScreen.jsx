@@ -24,7 +24,7 @@ const DriverRideActive = ({ route, navigation }) => {
         onPress: async () => {
           setLoading(true);
           try {
-            await completeTripApi(bookingId);
+            await completeTripApi(bookingId, booking?.estimatedFare || booking?.fare);
             navigation.replace('DriverHome');
           } catch (err) {
             Alert.alert('Error', err?.response?.data?.message || 'Could not complete trip');
@@ -113,8 +113,6 @@ const DriverRideActive = ({ route, navigation }) => {
               <Text className="text-[26px] font-bold text-black">
                 {booking?.fare
                   ? `₹${booking.fare}`
-                  : booking?.estimatedFare
-                  ? `₹${booking.estimatedFare}`
                   : 'As metered'}
               </Text>
             </View>
@@ -136,7 +134,7 @@ const DriverRideActive = ({ route, navigation }) => {
                   <View className="flex-1">
                     <Text className="text-gray-400 text-[11px] mb-[2px]">Booking ID</Text>
                     <Text className="text-black font-semibold text-[13px]" numberOfLines={1}>
-                      {booking._id?.slice(-8).toUpperCase()}
+                      {booking._id?.slice(-8)?.toUpperCase()}
                     </Text>
                   </View>
                   <View className="flex-1 items-end">

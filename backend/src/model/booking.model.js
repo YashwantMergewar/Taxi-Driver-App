@@ -19,13 +19,18 @@ const bookingSchema = new Schema({
     },
     estimatedFare: {
         type: Number,
-        required: true,
+        default: null,
         min: 0
     },
     finalFare: {
         type: Number,
-        min: 0,
-        required: true
+        default: null,
+        min: 0
+    },
+    distanceKm: {
+        type: Number,
+        default: null,
+        min: 0
     },
     status: {
         type: String,

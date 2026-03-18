@@ -19,7 +19,9 @@ export const rejectBookingApi = async (bookingId) => {
 };
 
 // PATCH /api/v1/bookings/:id/complete  (Driver only)
-export const completeTripApi = async (bookingId) => {
-  const { data } = await axiosInstance.patch(`/bookings/${bookingId}/complete`);
+export const completeTripApi = async (bookingId, fareAmount = null) => {
+  const { data } = await axiosInstance.patch(`/bookings/${bookingId}/complete`, {
+    ...(fareAmount && { fareAmount })
+  });
   return data;
 };

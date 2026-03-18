@@ -16,14 +16,15 @@ export const createBooking = asyncHandler(async (req, res) => {
       throw new ApiError(404, "Passenger profile not found");
     }
 
-    const { pickupLocation, dropoffLocation } = req.body;
+    const { pickupLocation, dropoffLocation, estimatedFare, distanceKm } = req.body;
 
     const booking = await Booking.create({
       passengerRef: passenger._id,
       pickupLocation,
       dropoffLocation,
-      estimatedFare: 3200,
-      finalFare: 3000
+      estimatedFare: estimatedFare ?? null,
+      finalFare: null,
+      distanceKm: distanceKm ?? null
     });
 
     // Debug log
@@ -179,7 +180,12 @@ export const completeTrip = asyncHandler(async (req, res) => {
       throw new ApiError(404, "Booking not found");
     }
 
+    // Accept fareAmount from request body (actual final fare agreed upon)
+    const { fareAmount } = req.body;
+    const finalFareToSave = fareAmount ?? booking.estimatedFare ?? 0;
+
     booking.status = "completed";
+    booking.finalFare = finalFareToSave;
     await booking.save();
 
     const rideHistory = await RideHistory.create({
@@ -188,7 +194,7 @@ export const completeTrip = asyncHandler(async (req, res) => {
       driverRef: booking.driverRef,
       pickupLocation: booking.pickupLocation,
       dropoffLocation: booking.dropoffLocation,
-      fareAmount: booking.finalFare,
+      fareAmount: finalFareToSave,
     });
 
     if (!rideHistory) {

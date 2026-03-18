@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { userLoginSchema, userRegistrationSchema } from "../../validationSchema/userValidationSchema.js";
 import { User } from "../model/user.model.js";
@@ -67,6 +68,8 @@ const registerUser = asyncHandler(async (req, res) => {
       phone,
       role,
     });
+    // eslint-disable-next-line no-console
+    console.log(`✓ User registered: email=${email}, role=${role}, userId=${user._id}, DB=${mongoose.connection.name}`);
     let profile = null;
 
     if (role === "Driver") {
@@ -91,6 +94,8 @@ const registerUser = asyncHandler(async (req, res) => {
     }
 
     await user.save();
+    // eslint-disable-next-line no-console
+    console.log(`✓ User profile saved: ${role} profile created, DB=${mongoose.connection.name}`);
 
     const createdUser = await User.findById(user._id)
       .select("-password -refreshToken")
@@ -117,13 +122,21 @@ const loginUser = asyncHandler(async (req, res) => {
   const { email, username, password } = validatedData.data;
 
   try {
+    // eslint-disable-next-line no-console
+    console.log(`🔍 LOGIN: Looking for user with email=${email}, DB=${mongoose.connection.name}`);
+    
     const user = await User.findOne({
       $or: [{ email }, { username }],
     }).select("+password"); 
 
     if (!user) {
+      // eslint-disable-next-line no-console
+      console.log(`✗ LOGIN FAILED: User not found in DB=${mongoose.connection.name}`);
       throw new ApiError(404, "User not found");
     }
+
+    // eslint-disable-next-line no-console
+    console.log(`✓ LOGIN: User found - ${user.email}, userId=${user._id}, DB=${mongoose.connection.name}`);
 
     const isPasswordValid = await user.isPasswordCorrect(password);
 
@@ -161,13 +174,18 @@ const loginUser = asyncHandler(async (req, res) => {
     res.cookie("accessToken", accessToken, option);
     res.cookie("refreshToken", refreshToken, option);
 
-    return res.status(200).json({
+    const response = {
       success: true,
       message: `${populatedUser?.role} ${populatedUser.passengerRef?.fullname || populatedUser.driverRef?.fullname} logged in successfully`,
       user: populatedUser,
-      accessToken,   // Added for Expo compatibility
-      refreshToken  // Added for Expo compatibility
-    });
+      accessToken,
+      refreshToken
+    };
+    
+    // eslint-disable-next-line no-console
+    console.log(`✓ LOGIN SUCCESS: Sending response with user=${populatedUser.email}`);
+    
+    return res.status(200).json(response);
 
   } catch (error) {
     throw new ApiError(500, error.message || "Unable to login user..!");

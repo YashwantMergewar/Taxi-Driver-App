@@ -282,7 +282,7 @@ const DriverHome = ({ navigation }) => {
         onPress: async () => {
           setCompleting(true);
           try {
-            await completeTripApi(currentBooking._id);
+            await completeTripApi(currentBooking._id, currentBooking?.estimatedFare || currentBooking?.fare);
             setCurrentView('home');
             setCurrentBooking(null);
             await fetchProfile();
@@ -436,15 +436,8 @@ const DriverHome = ({ navigation }) => {
 
             {currentBooking.fare && (
               <View className="flex-row justify-between items-center bg-gray-50 rounded-xl p-3 mb-4">
-                <Text className="text-gray-500 text-sm">Estimated Fare</Text>
+                <Text className="text-gray-500 text-sm">Fare</Text>
                 <Text className="text-black font-bold text-xl">₹{currentBooking.fare}</Text>
-              </View>
-            )}
-
-            {currentBooking.estimatedFare && !currentBooking.fare && (
-              <View className="flex-row justify-between items-center bg-gray-50 rounded-xl p-3 mb-4">
-                <Text className="text-gray-500 text-sm">Estimated Fare</Text>
-                <Text className="text-black font-bold text-xl">₹{currentBooking.estimatedFare}</Text>
               </View>
             )}
 
@@ -626,11 +619,7 @@ const DriverHome = ({ navigation }) => {
               <View className="flex-row justify-between items-center">
                 <Text className="text-gray-500">Fare</Text>
                 <Text className="text-[26px] font-bold text-black">
-                  {currentBooking.fare
-                    ? `₹${currentBooking.fare}`
-                    : currentBooking.estimatedFare
-                    ? `₹${currentBooking.estimatedFare}`
-                    : 'As metered'}
+                  {currentBooking.fare ? `₹${currentBooking.fare}` : 'As metered'}
                 </Text>
               </View>
               {currentBooking.distanceKm && (
@@ -649,7 +638,7 @@ const DriverHome = ({ navigation }) => {
                     <View className="flex-1">
                       <Text className="text-gray-400 text-[11px] mb-[2px]">Booking ID</Text>
                       <Text className="text-black font-semibold text-[13px]" numberOfLines={1}>
-                        {currentBooking._id?.slice(-8).toUpperCase()}
+                        {currentBooking._id?.slice(-8)?.toUpperCase()}
                       </Text>
                     </View>
                     <View className="flex-1 items-end">

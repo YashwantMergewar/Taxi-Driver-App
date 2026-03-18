@@ -5,7 +5,7 @@ import * as SecureStore from 'expo-secure-store';
 
 // Determine API host dynamically so the app works on emulator, simulator, or physical device.
 // Default to Android emulator loopback. Change to your machine IP for physical devices.
-let API_BASE_URL = "http://10.98.231.174:8000/api/v1" || "http://192.168.31.191:8000/api/v1" || 'http://10.0.2.2:8000/api/v1';
+let API_BASE_URL = "http://192.168.31.191:8000/api/v1" || 'http://10.0.2.2:8000/api/v1';
 
 // Log resolved base URL at runtime to help debug Network Error issues
 try {

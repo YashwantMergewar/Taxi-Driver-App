@@ -24,11 +24,7 @@ const BookingCard = ({ item, onAccept, onReject, accepting, rejecting }) => {
               {item.status || 'Pending'}
             </Text>
           </View>
-          {item.fare
-            ? <Text className="text-[22px] font-bold text-black">₹{item.fare}</Text>
-            : item.estimatedFare
-            ? <Text className="text-[22px] font-bold text-black">₹{item.estimatedFare}</Text>
-            : null}
+          {item.fare ? <Text className="text-[22px] font-bold text-black">₹{item.fare}</Text> : null}
         </View>
 
         {/* Passenger name */}
